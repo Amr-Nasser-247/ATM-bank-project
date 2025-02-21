@@ -1,0 +1,174 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+int balance, password, p, B;
+string username, u;
+
+void clearScreen()
+{
+    system("cls");
+}
+
+void registerUser() {
+    cout << "\n Enter a user name : \t Do not use any space! \t";
+    cin >> username;
+    cout << "\n Enter a password : \t Do not enter characters, Only numbers!  ";
+    cin >> password;
+    cout << "\n Enter the amount you want to deposit in your account :  ";
+    cin >> balance;
+
+
+    ofstream file("accounts.txt", ios::app);
+    file << username << " " << password << " " << balance << endl;
+    file.close();
+    cout << "\n Your account has been registered successfully. \n";
+}
+
+bool loginUser() {
+    cout << "\n Enter your username : \t Do not use any space! \t";
+    cin >> u;
+    cout << "\n Enter your password : \t Do not enter characters, Only numbers!  ";
+    cin >> p;
+
+    ifstream file("accounts.txt");
+    while (file >> username >> password >> balance) {
+        if (u == username && p == password) {
+            cout << "\n You has logged in successfully!\n";
+            return true;
+        }
+    }
+    file.close();
+    cout << "\n Error in username or password!\n";
+    loginUser();
+    return false;
+}
+
+void deleteAccount() {
+    bool found = false;
+    ifstream file("accounts.txt");
+    ofstream temp("temp.txt", ios::app);
+    if (file.is_open() && temp.is_open()) {
+        while (file >> username >> password >> balance) {
+            if (username == u && password == p) {
+                found = true;
+            }
+            else {
+                temp << username << " " << password << " " << balance << endl;
+            }
+        }
+        file.close();
+        temp.close();
+        remove("accounts.txt");
+        rename("temp.txt", "accounts.txt");
+
+        if (!found) {
+            cout << "\n Account does not exist!\n";
+        }
+    }
+    else {
+        cout << "\n Error in accountList! \n";
+    }
+}
+
+void registerAUser() {
+    ofstream file("accounts.txt", ios::app);
+    file << username << " " << password << " " << B << endl;
+    file.close();
+}
+
+
+int main() {
+    cout << "     ******* Welcome ******* \n\n" << endl;
+accountManagement:                                  //To Creat and login to the accounts
+    int choice;
+    cout << "1.Creat a new account\t   2.Login\n";
+    cin >> choice;
+    if (choice == 1)
+    {
+        registerUser();                             //Creat an account
+        clearScreen();
+        cout << "Your account has been registered successfully. \n\n";
+        goto accountManagement;                     //Go back to login or creat another account
+    }
+    else if (choice == 2) {
+        loginUser();                                //Go to login
+        clearScreen();
+        cout << "\n You has logged in successfully! \n";
+    }
+    else {
+        cout << "\n Not a valid choice!\n";
+        goto accountManagement;
+    }
+    int amount, Choice, option, value;
+Menu:                                              //The Main Menu
+    cout << "\n\t  1.Balance\t" << "\t  2.Withdraw \n" << "\t  3.Deposit\t" << "\t  4.Exit\n";
+    cin >> option;
+    if (option > 4 || option < 1)
+    {
+        cout << "\n  ERROR!  Enter a valid option.\n\n";
+        goto Menu;
+    }
+    switch (option)
+    {
+    case 1:                                        //Show balance
+        cout << "\n Your balance is : " << balance << "\n";
+        break;
+    case 2:                                        //Withdraw
+        cout << "\n Enter the withdrawal amount : ";
+    Withdraw:
+        cin >> amount;
+        if (amount > balance || amount <= 0)        //To be sure that the treatment is possible
+        {
+            cout << "\n  ERROR!  Your balance is not enough!  Enter a valid amount.\n";
+            goto Withdraw;
+        }
+        balance = balance - amount;                 //Assign the new balance
+        cout << "\n The operation was completed successfully. \nYour balance now is : " << balance << ".\n";
+        break;
+    case 3:                                         //Deposit
+    Value:
+        cout << "\n Enter the deposit amount : \t Enter 0 to cancel. ";
+        cin >> value;
+        if (value <= 0)                             //To not enter a negative amount
+        {
+            cout << "\n  ERROR!  Enter a valid amount.\n";
+            goto Value;
+        }
+        balance = balance + value;                  //Assign the new balance
+        cout << "\n The operation was completed successfully. \nYour balance now is : " << balance << ".\n";
+        break;
+    }
+    if (option == 4)                                //Exit
+    {
+        B = balance;                                //
+        deleteAccount();                            //To delete the old balance and save the new balance
+        registerAUser();                            //
+        cout << "\n\n\n\t  *** Thanks for using our bank. ***\n\n\n";
+        return 0;
+    }
+
+    cout << "\n Do you want another process ?\n" << "1: Yes.\t" << "2: No. :  ";
+Choice:                                             //To do another transaction or end the process
+    cin >> Choice;
+    if (Choice == 1)
+    {
+        clearScreen();
+        goto Menu;
+    }
+    else if (Choice == 2)
+    {
+        clearScreen();
+        cout << "\n\n\n\t  *** Thanks for using our bank. ***\n\n\n";
+        B = balance;                                //
+        deleteAccount();                            //To delete the old balance and save the new balance
+        registerAUser();                            //
+        return 0;
+    }
+    else
+    {
+        cout << "\n  ERROR!  Enter a valid choice.\n";
+        goto Choice;
+    }
+}
